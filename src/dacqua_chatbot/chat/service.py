@@ -10,9 +10,13 @@ from dacqua_chatbot.inference import (
     InferenceProvider,
 )
 from dacqua_chatbot.policies import ChatPolicy
+from dacqua_chatbot.tools import (
+    BusinessDataProvider,
+    BusinessQueryRouter,
+)
 
 
-ResponseSource = Literal["model", "policy"]
+ResponseSource = Literal["model", "policy", "tool"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,18 +31,29 @@ class ChatResult:
     output_tokens: int
     generation_seconds: float
     policy_rule: str | None = None
+    tool_status: str | None = None
+    tool_source: str | None = None
 
 
 class ChatService:
-    """Coordinate policy evaluation and model inference."""
+    """Coordinate policy, authoritative tools, and inference."""
 
     def __init__(
         self,
         provider: InferenceProvider,
         policy: ChatPolicy,
+        business_data: BusinessDataProvider,
+        *,
+        business_router: BusinessQueryRouter | None = None,
     ) -> None:
         self.provider = provider
         self.policy = policy
+        self.business_data = business_data
+        self.business_router = (
+            business_router
+            if business_router is not None
+            else BusinessQueryRouter()
+        )
 
     def chat(
         self,
@@ -46,7 +61,7 @@ class ChatService:
         *,
         max_new_tokens: int = 128,
     ) -> ChatResult:
-        """Generate or policy-handle one chatbot response."""
+        """Policy-check, tool-route, or generate one response."""
 
         if not messages:
             raise ValueError(
@@ -72,6 +87,38 @@ class ChatService:
                 policy_rule=decision.rule,
             )
 
+        business_kind = self.business_router.classify(
+            messages
+        )
+
+        if business_kind is not None:
+            query = self.business_router.latest_user_text(
+                messages
+            )
+
+            if business_kind == "price":
+                tool_result = self.business_data.lookup_price(
+                    query
+                )
+            else:
+                tool_result = (
+                    self.business_data.lookup_availability(
+                        query
+                    )
+                )
+
+            return ChatResult(
+                text=tool_result.text,
+                source="tool",
+                model="authoritative-business-data",
+                device="server",
+                input_tokens=0,
+                output_tokens=0,
+                generation_seconds=0.0,
+                tool_status=tool_result.status,
+                tool_source=tool_result.source,
+            )
+
         generated = self.provider.generate(
             messages,
             max_new_tokens=max_new_tokens,
@@ -85,5 +132,4 @@ class ChatService:
             input_tokens=generated.input_tokens,
             output_tokens=generated.output_tokens,
             generation_seconds=generated.generation_seconds,
-            policy_rule=None,
         )

@@ -1,4 +1,4 @@
-"""Real offline API, policy, and model smoke test."""
+"""Real offline API, business-tool, policy, and model smoke test."""
 
 import os
 
@@ -33,7 +33,7 @@ def main() -> None:
             )
 
         print()
-        print("===== POLICY-ONLY PRICING REQUEST =====")
+        print("===== AUTHORITATIVE PRICE ROUTE =====")
 
         pricing = client.post(
             "/v1/chat",
@@ -54,23 +54,28 @@ def main() -> None:
 
         if pricing.status_code != 200:
             raise RuntimeError(
-                "Policy pricing request failed."
+                "Price request failed."
             )
 
-        if pricing.json()["source"] != "policy":
+        if pricing.json()["source"] != "tool":
             raise RuntimeError(
-                "Pricing request was not policy-handled."
+                "Price request did not route to business tool."
             )
 
-        after_policy = client.get("/health")
+        if pricing.json()["tool_status"] != "unavailable":
+            raise RuntimeError(
+                "Unexpected default tool status."
+            )
+
+        after_tool = client.get("/health")
 
         print()
-        print("===== HEALTH AFTER POLICY REQUEST =====")
-        print(after_policy.json())
+        print("===== HEALTH AFTER TOOL REQUEST =====")
+        print(after_tool.json())
 
-        if after_policy.json()["loaded"]:
+        if after_tool.json()["loaded"]:
             raise RuntimeError(
-                "Policy-only request unexpectedly loaded model."
+                "Tool-only request unexpectedly loaded model."
             )
 
         print()

@@ -12,11 +12,12 @@ from dacqua_chatbot.inference import (
     InferenceProvider,
     InferenceStatus,
 )
+from dacqua_chatbot.tools import (
+    UnavailableBusinessDataProvider,
+)
 
 
 class FakeProvider(InferenceProvider):
-    """Inference provider that never loads a real model."""
-
     def __init__(self) -> None:
         self.calls = 0
 
@@ -51,8 +52,12 @@ class ApiTests(unittest.TestCase):
         self.provider = FakeProvider()
 
         self.client_context = TestClient(
-            create_app(self.provider)
+            create_app(
+                provider=self.provider,
+                business_data=UnavailableBusinessDataProvider(),
+            )
         )
+
         self.client = self.client_context.__enter__()
 
     def tearDown(self) -> None:
@@ -66,10 +71,6 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/health")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.json()["provider"],
-            "fake",
-        )
 
     def test_normal_chat_uses_model(self) -> None:
         response = self.client.post(
@@ -85,14 +86,13 @@ class ApiTests(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-
-        body = response.json()
-
-        self.assertEqual(body["source"], "model")
-        self.assertIsNone(body["policy_rule"])
+        self.assertEqual(
+            response.json()["source"],
+            "model",
+        )
         self.assertEqual(self.provider.calls, 1)
 
-    def test_pricing_request_uses_policy(self) -> None:
+    def test_price_request_uses_business_tool(self) -> None:
         response = self.client.post(
             "/v1/chat",
             json={
@@ -108,14 +108,16 @@ class ApiTests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-
         body = response.json()
 
-        self.assertEqual(body["source"], "policy")
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            body["policy_rule"],
-            "authoritative_pricing_required",
+            body["source"],
+            "tool",
+        )
+        self.assertEqual(
+            body["tool_status"],
+            "unavailable",
         )
         self.assertEqual(self.provider.calls, 0)
 

@@ -11,41 +11,7 @@ from .base import ChatPolicy, PolicyDecision
 
 
 class DefaultChatPolicy(ChatPolicy):
-    """Deterministic safeguards independent of the language model."""
-
-    _BRAND_TERMS = (
-        "d'acqua",
-        "dacqua",
-        "origin",
-        "refine",
-        "clarity",
-        "silken",
-        "harmony",
-        "lucent",
-        "our system",
-        "our product",
-        "our water",
-    )
-
-    _PRICE_TERMS = (
-        "current price",
-        "price of",
-        "how much",
-        "cost of",
-        "quote me",
-        "quote for",
-        "pricing",
-    )
-
-    _AVAILABILITY_TERMS = (
-        "in stock",
-        "currently available",
-        "available for installation",
-        "installation this week",
-        "installation next week",
-        "schedule installation",
-        "book installation",
-    )
+    """Deterministic safeguards independent of model and business tools."""
 
     _HEALTH_PATTERNS = (
         r"\bprevent(?:s|ing)? disease\b",
@@ -90,9 +56,8 @@ class DefaultChatPolicy(ChatPolicy):
 
         return ""
 
-    @classmethod
+    @staticmethod
     def _contains_any(
-        cls,
         text: str,
         terms: tuple[str, ...],
     ) -> bool:
@@ -102,7 +67,7 @@ class DefaultChatPolicy(ChatPolicy):
         self,
         messages: Sequence[ChatMessage],
     ) -> PolicyDecision:
-        """Apply deterministic D'Acqua business and safety rules."""
+        """Apply deterministic D'Acqua safety and compliance rules."""
 
         user_text = self._latest_user_text(messages)
 
@@ -157,49 +122,7 @@ class DefaultChatPolicy(ChatPolicy):
                     "I can't claim that a D'Acqua Dolce filtration system "
                     "prevents disease, cures medical conditions, or extends "
                     "lifespan without appropriate substantiation. I can "
-                    "describe the system's documented filtration functions "
-                    "instead."
-                ),
-            )
-
-        brand_related = self._contains_any(
-            normalized,
-            self._BRAND_TERMS,
-        )
-
-        if (
-            brand_related
-            and self._contains_any(
-                normalized,
-                self._AVAILABILITY_TERMS,
-            )
-        ):
-            return PolicyDecision(
-                handled=True,
-                rule="authoritative_availability_required",
-                response=(
-                    "Current inventory and installation availability must "
-                    "come from D'Acqua Dolce's authoritative business "
-                    "systems. I don't have verified live availability in "
-                    "this request yet."
-                ),
-            )
-
-        if (
-            brand_related
-            and self._contains_any(
-                normalized,
-                self._PRICE_TERMS,
-            )
-        ):
-            return PolicyDecision(
-                handled=True,
-                rule="authoritative_pricing_required",
-                response=(
-                    "Current D'Acqua Dolce pricing must come from "
-                    "authoritative business pricing data. I don't have a "
-                    "verified current price in this request, so I won't "
-                    "invent or estimate one."
+                    "describe documented filtration functions instead."
                 ),
             )
 

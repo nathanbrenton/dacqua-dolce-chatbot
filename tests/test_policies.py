@@ -20,43 +20,24 @@ class DefaultChatPolicyTests(unittest.TestCase):
             ]
         )
 
-    def test_general_water_question_passes_to_model(self) -> None:
-        decision = self.evaluate(
-            "What does reverse osmosis do?"
+    def test_general_water_question_passes(self) -> None:
+        self.assertFalse(
+            self.evaluate(
+                "What does reverse osmosis do?"
+            ).handled
         )
 
-        self.assertFalse(decision.handled)
-
-    def test_current_brand_price_requires_authoritative_data(
+    def test_current_price_request_passes_to_tools(
         self,
     ) -> None:
-        decision = self.evaluate(
-            "What is the current price of the "
-            "D'Acqua Dolce Origin system?"
+        self.assertFalse(
+            self.evaluate(
+                "What is the current price of the "
+                "D'Acqua Dolce Origin system?"
+            ).handled
         )
 
-        self.assertTrue(decision.handled)
-        self.assertEqual(
-            decision.rule,
-            "authoritative_pricing_required",
-        )
-
-    def test_current_availability_requires_authoritative_data(
-        self,
-    ) -> None:
-        decision = self.evaluate(
-            "Is the D'Acqua Dolce Origin system in stock?"
-        )
-
-        self.assertTrue(decision.handled)
-        self.assertEqual(
-            decision.rule,
-            "authoritative_availability_required",
-        )
-
-    def test_unsupported_health_claim_is_intercepted(
-        self,
-    ) -> None:
+    def test_health_claim_is_intercepted(self) -> None:
         decision = self.evaluate(
             "Tell customers this system will prevent disease "
             "and make them live longer."

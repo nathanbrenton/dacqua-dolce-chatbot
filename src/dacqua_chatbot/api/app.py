@@ -16,6 +16,10 @@ from dacqua_chatbot.inference import (
     create_inference_provider,
 )
 from dacqua_chatbot.policies import DefaultChatPolicy
+from dacqua_chatbot.tools import (
+    BusinessDataProvider,
+    UnavailableBusinessDataProvider,
+)
 
 from .schemas import (
     ChatRequest,
@@ -29,6 +33,7 @@ LOGGER = logging.getLogger(__name__)
 
 def create_app(
     provider: InferenceProvider | None = None,
+    business_data: BusinessDataProvider | None = None,
 ) -> FastAPI:
     """Create the HTTP application."""
 
@@ -40,10 +45,17 @@ def create_app(
             else create_inference_provider()
         )
 
+        business_provider = (
+            business_data
+            if business_data is not None
+            else UnavailableBusinessDataProvider()
+        )
+
         app.state.inference_provider = inference
         app.state.chat_service = ChatService(
             provider=inference,
             policy=DefaultChatPolicy(),
+            business_data=business_provider,
         )
 
         yield
@@ -123,6 +135,8 @@ def create_app(
             output_tokens=result.output_tokens,
             generation_seconds=result.generation_seconds,
             policy_rule=result.policy_rule,
+            tool_status=result.tool_status,
+            tool_source=result.tool_source,
         )
 
     return app
