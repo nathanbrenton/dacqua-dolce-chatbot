@@ -90,6 +90,12 @@ class ApiTests(unittest.TestCase):
             response.json()["source"],
             "model",
         )
+        self.assertIn(
+            "water-reverse-osmosis",
+            response.json()[
+                "knowledge_document_ids"
+            ],
+        )
         self.assertEqual(self.provider.calls, 1)
 
     def test_price_request_uses_business_tool(self) -> None:

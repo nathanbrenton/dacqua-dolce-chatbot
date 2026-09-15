@@ -3,19 +3,35 @@
 from __future__ import annotations
 
 import logging
-from contextlib import asynccontextmanager
+from contextlib import (
+    asynccontextmanager,
+)
 from functools import partial
 
-from fastapi import FastAPI, HTTPException, Request
-from starlette.concurrency import run_in_threadpool
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Request,
+)
+from starlette.concurrency import (
+    run_in_threadpool,
+)
 
-from dacqua_chatbot.chat import ChatService
+from dacqua_chatbot.chat import (
+    ChatService,
+)
 from dacqua_chatbot.inference import (
     ChatMessage,
     InferenceProvider,
     create_inference_provider,
 )
-from dacqua_chatbot.policies import DefaultChatPolicy
+from dacqua_chatbot.knowledge import (
+    KnowledgeRetriever,
+    create_knowledge_retriever,
+)
+from dacqua_chatbot.policies import (
+    DefaultChatPolicy,
+)
 from dacqua_chatbot.tools import (
     BusinessDataProvider,
     create_business_data_provider,
@@ -28,17 +44,22 @@ from .schemas import (
 )
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(
+    __name__
+)
 
 
 def create_app(
     provider: InferenceProvider | None = None,
     business_data: BusinessDataProvider | None = None,
+    knowledge_retriever: KnowledgeRetriever | None = None,
 ) -> FastAPI:
     """Create the HTTP application."""
 
     @asynccontextmanager
-    async def lifespan(app: FastAPI):
+    async def lifespan(
+        app: FastAPI,
+    ):
         inference = (
             provider
             if provider is not None
@@ -51,11 +72,28 @@ def create_app(
             else create_business_data_provider()
         )
 
-        app.state.inference_provider = inference
-        app.state.chat_service = ChatService(
-            provider=inference,
-            policy=DefaultChatPolicy(),
-            business_data=business_provider,
+        retriever = (
+            knowledge_retriever
+            if knowledge_retriever
+            is not None
+            else create_knowledge_retriever()
+        )
+
+        app.state.inference_provider = (
+            inference
+        )
+
+        app.state.chat_service = (
+            ChatService(
+                provider=inference,
+                policy=DefaultChatPolicy(),
+                business_data=(
+                    business_provider
+                ),
+                knowledge_retriever=(
+                    retriever
+                ),
+            )
         )
 
         yield
@@ -70,9 +108,12 @@ def create_app(
         "/health",
         response_model=HealthResponse,
     )
-    async def health(request: Request) -> HealthResponse:
+    async def health(
+        request: Request,
+    ) -> HealthResponse:
         inference: InferenceProvider = (
-            request.app.state.inference_provider
+            request.app.state
+            .inference_provider
         )
 
         status = inference.status()
@@ -93,24 +134,32 @@ def create_app(
         payload: ChatRequest,
         request: Request,
     ) -> ChatResponse:
-        service: ChatService = request.app.state.chat_service
+        service: ChatService = (
+            request.app.state
+            .chat_service
+        )
 
         messages = [
             ChatMessage(
                 role=message.role,
                 content=message.content,
             )
-            for message in payload.messages
+            for message
+            in payload.messages
         ]
 
         try:
             call = partial(
                 service.chat,
                 messages,
-                max_new_tokens=payload.max_new_tokens,
+                max_new_tokens=(
+                    payload.max_new_tokens
+                ),
             )
 
-            result = await run_in_threadpool(call)
+            result = await run_in_threadpool(
+                call
+            )
 
         except ValueError as exc:
             raise HTTPException(
@@ -119,11 +168,15 @@ def create_app(
             ) from exc
 
         except Exception as exc:
-            LOGGER.exception("Chat request failed")
+            LOGGER.exception(
+                "Chat request failed"
+            )
 
             raise HTTPException(
                 status_code=503,
-                detail="Chat service unavailable.",
+                detail=(
+                    "Chat service unavailable."
+                ),
             ) from exc
 
         return ChatResponse(
@@ -131,12 +184,27 @@ def create_app(
             source=result.source,
             model=result.model,
             device=result.device,
-            input_tokens=result.input_tokens,
-            output_tokens=result.output_tokens,
-            generation_seconds=result.generation_seconds,
-            policy_rule=result.policy_rule,
-            tool_status=result.tool_status,
-            tool_source=result.tool_source,
+            input_tokens=(
+                result.input_tokens
+            ),
+            output_tokens=(
+                result.output_tokens
+            ),
+            generation_seconds=(
+                result.generation_seconds
+            ),
+            policy_rule=(
+                result.policy_rule
+            ),
+            tool_status=(
+                result.tool_status
+            ),
+            tool_source=(
+                result.tool_source
+            ),
+            knowledge_document_ids=list(
+                result.knowledge_document_ids
+            ),
         )
 
     return app

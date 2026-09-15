@@ -117,6 +117,17 @@ def main() -> None:
                 "Normal question did not reach model."
             )
 
+        if (
+            "water-reverse-osmosis"
+            not in normal.json()[
+                "knowledge_document_ids"
+            ]
+        ):
+            raise RuntimeError(
+                "Normal RO question did not use "
+                "the curated retrieval corpus."
+            )
+
         final_health = client.get("/health")
 
         print()
