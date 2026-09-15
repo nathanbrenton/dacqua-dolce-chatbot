@@ -28,8 +28,23 @@ class GenerationResult:
     generation_seconds: float
 
 
+@dataclass(frozen=True, slots=True)
+class InferenceStatus:
+    """Provider-independent runtime status."""
+
+    provider: str
+    model: str
+    device: str
+    loaded: bool
+
+
 class InferenceProvider(ABC):
-    """Provider-independent interface for chatbot text generation."""
+    """Provider-independent interface for text generation."""
+
+    @abstractmethod
+    def status(self) -> InferenceStatus:
+        """Return normalized provider/runtime status."""
+        raise NotImplementedError
 
     @abstractmethod
     def generate(

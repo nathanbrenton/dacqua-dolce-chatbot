@@ -10,7 +10,12 @@ from typing import Sequence
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from .base import ChatMessage, GenerationResult, InferenceProvider
+from .base import (
+    ChatMessage,
+    GenerationResult,
+    InferenceProvider,
+    InferenceStatus,
+)
 
 
 MODEL_PATH_ENV = "DACQUA_MODEL_PATH"
@@ -81,6 +86,16 @@ class TransformersProvider(InferenceProvider):
     @property
     def load_seconds(self) -> float | None:
         return self._load_seconds
+
+    def status(self) -> InferenceStatus:
+        """Return provider status without forcing model loading."""
+
+        return InferenceStatus(
+            provider="transformers",
+            model=self.model_name,
+            device=self.device,
+            loaded=self.is_loaded,
+        )
 
     def load(self) -> None:
         """Load tokenizer and model entirely from local files."""
