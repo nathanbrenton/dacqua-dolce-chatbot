@@ -6,6 +6,12 @@ from .base import (
     BusinessToolResult,
     BusinessToolStatus,
 )
+from .factory import (
+    create_business_data_provider,
+)
+from .http_provider import (
+    DacquaBackendBusinessDataProvider,
+)
 from .providers import (
     InMemoryBusinessDataProvider,
     UnavailableBusinessDataProvider,
@@ -18,6 +24,8 @@ __all__ = [
     "BusinessQueryRouter",
     "BusinessToolResult",
     "BusinessToolStatus",
+    "DacquaBackendBusinessDataProvider",
     "InMemoryBusinessDataProvider",
     "UnavailableBusinessDataProvider",
+    "create_business_data_provider",
 ]

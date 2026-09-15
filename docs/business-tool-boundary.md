@@ -34,3 +34,31 @@ Planned production flow:
 The production provider should ultimately communicate with the primary
 D'Acqua Dolce backend/API rather than duplicate pricing or inventory data
 inside the chatbot repository.
+
+## Primary D'Acqua backend provider
+
+The `dacqua_backend` provider retrieves authoritative customer-safe business
+information from the primary D'Acqua HTTP API.
+
+Configuration:
+
+    DACQUA_BUSINESS_DATA_PROVIDER=dacqua_backend
+    DACQUA_BACKEND_BASE_URL=http://127.0.0.1:8000
+
+Pricing comes only from the public catalog response.
+
+The chatbot honors `display_price`. If the backend withholds public pricing,
+the chatbot does not inspect, reconstruct, estimate, or infer a hidden amount.
+
+Availability comes from:
+
+    GET /api/catalog/products/{slug}/availability
+
+This customer-safe endpoint intentionally excludes raw quantity-on-hand and
+reservation counts.
+
+Installation-calendar availability is not currently modeled by an
+authoritative D'Acqua scheduling interface, so the chatbot does not invent
+installation slots.
+
+The privileged operations catalog is not a chatbot data source.

@@ -18,7 +18,7 @@ from dacqua_chatbot.inference import (
 from dacqua_chatbot.policies import DefaultChatPolicy
 from dacqua_chatbot.tools import (
     BusinessDataProvider,
-    UnavailableBusinessDataProvider,
+    create_business_data_provider,
 )
 
 from .schemas import (
@@ -48,7 +48,7 @@ def create_app(
         business_provider = (
             business_data
             if business_data is not None
-            else UnavailableBusinessDataProvider()
+            else create_business_data_provider()
         )
 
         app.state.inference_provider = inference
