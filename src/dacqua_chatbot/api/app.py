@@ -9,11 +9,13 @@ from functools import partial
 from fastapi import FastAPI, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 
+from dacqua_chatbot.chat import ChatService
 from dacqua_chatbot.inference import (
     ChatMessage,
     InferenceProvider,
     create_inference_provider,
 )
+from dacqua_chatbot.policies import DefaultChatPolicy
 
 from .schemas import (
     ChatRequest,
@@ -32,11 +34,18 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.inference_provider = (
+        inference = (
             provider
             if provider is not None
             else create_inference_provider()
         )
+
+        app.state.inference_provider = inference
+        app.state.chat_service = ChatService(
+            provider=inference,
+            policy=DefaultChatPolicy(),
+        )
+
         yield
 
     app = FastAPI(
@@ -72,9 +81,7 @@ def create_app(
         payload: ChatRequest,
         request: Request,
     ) -> ChatResponse:
-        inference: InferenceProvider = (
-            request.app.state.inference_provider
-        )
+        service: ChatService = request.app.state.chat_service
 
         messages = [
             ChatMessage(
@@ -85,13 +92,13 @@ def create_app(
         ]
 
         try:
-            generate = partial(
-                inference.generate,
+            call = partial(
+                service.chat,
                 messages,
                 max_new_tokens=payload.max_new_tokens,
             )
 
-            result = await run_in_threadpool(generate)
+            result = await run_in_threadpool(call)
 
         except ValueError as exc:
             raise HTTPException(
@@ -100,20 +107,22 @@ def create_app(
             ) from exc
 
         except Exception as exc:
-            LOGGER.exception("Inference request failed")
+            LOGGER.exception("Chat request failed")
 
             raise HTTPException(
                 status_code=503,
-                detail="Inference service unavailable.",
+                detail="Chat service unavailable.",
             ) from exc
 
         return ChatResponse(
             text=result.text,
+            source=result.source,
             model=result.model,
             device=result.device,
             input_tokens=result.input_tokens,
             output_tokens=result.output_tokens,
             generation_seconds=result.generation_seconds,
+            policy_rule=result.policy_rule,
         )
 
     return app

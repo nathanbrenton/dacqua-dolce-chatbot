@@ -1,4 +1,4 @@
-"""Real offline API-to-model smoke test."""
+"""Real offline API, policy, and model smoke test."""
 
 import os
 
@@ -22,15 +22,61 @@ def main() -> None:
     app = create_app()
 
     with TestClient(app) as client:
-        print("===== HEALTH BEFORE GENERATION =====")
+        print("===== HEALTH BEFORE REQUESTS =====")
+
         before = client.get("/health")
-        print(before.status_code)
         print(before.json())
 
-        print()
-        print("===== CHAT =====")
+        if before.json()["loaded"]:
+            raise RuntimeError(
+                "Model should not be loaded at startup."
+            )
 
-        response = client.post(
+        print()
+        print("===== POLICY-ONLY PRICING REQUEST =====")
+
+        pricing = client.post(
+            "/v1/chat",
+            json={
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": (
+                            "What is the current price of the "
+                            "D'Acqua Dolce Origin system?"
+                        ),
+                    }
+                ]
+            },
+        )
+
+        print(pricing.json())
+
+        if pricing.status_code != 200:
+            raise RuntimeError(
+                "Policy pricing request failed."
+            )
+
+        if pricing.json()["source"] != "policy":
+            raise RuntimeError(
+                "Pricing request was not policy-handled."
+            )
+
+        after_policy = client.get("/health")
+
+        print()
+        print("===== HEALTH AFTER POLICY REQUEST =====")
+        print(after_policy.json())
+
+        if after_policy.json()["loaded"]:
+            raise RuntimeError(
+                "Policy-only request unexpectedly loaded model."
+            )
+
+        print()
+        print("===== NORMAL MODEL REQUEST =====")
+
+        normal = client.post(
             "/v1/chat",
             json={
                 "messages": [
@@ -54,23 +100,27 @@ def main() -> None:
             },
         )
 
-        print(response.status_code)
-        print(response.json())
+        print(normal.json())
 
-        if response.status_code != 200:
+        if normal.status_code != 200:
             raise RuntimeError(
-                "Chat endpoint smoke test failed."
+                "Normal model request failed."
             )
 
-        print()
-        print("===== HEALTH AFTER GENERATION =====")
-        after = client.get("/health")
-        print(after.status_code)
-        print(after.json())
-
-        if not after.json()["loaded"]:
+        if normal.json()["source"] != "model":
             raise RuntimeError(
-                "Provider did not report loaded state."
+                "Normal question did not reach model."
+            )
+
+        final_health = client.get("/health")
+
+        print()
+        print("===== HEALTH AFTER MODEL REQUEST =====")
+        print(final_health.json())
+
+        if not final_health.json()["loaded"]:
+            raise RuntimeError(
+                "Model failed to enter loaded state."
             )
 
 

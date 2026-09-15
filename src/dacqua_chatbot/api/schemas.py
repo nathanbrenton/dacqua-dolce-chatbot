@@ -37,11 +37,13 @@ class ChatResponse(BaseModel):
     """Normalized chat response."""
 
     text: str
+    source: Literal["model", "policy"]
     model: str
     device: str
     input_tokens: int
     output_tokens: int
     generation_seconds: float
+    policy_rule: str | None = None
 
 
 class HealthResponse(BaseModel):

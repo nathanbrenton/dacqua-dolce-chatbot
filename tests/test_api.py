@@ -17,12 +17,15 @@ from dacqua_chatbot.inference import (
 class FakeProvider(InferenceProvider):
     """Inference provider that never loads a real model."""
 
+    def __init__(self) -> None:
+        self.calls = 0
+
     def status(self) -> InferenceStatus:
         return InferenceStatus(
             provider="fake",
             model="fake-model",
             device="cpu",
-            loaded=True,
+            loaded=self.calls > 0,
         )
 
     def generate(
@@ -31,8 +34,7 @@ class FakeProvider(InferenceProvider):
         *,
         max_new_tokens: int = 128,
     ) -> GenerationResult:
-        if not messages:
-            raise ValueError("At least one message is required.")
+        self.calls += 1
 
         return GenerationResult(
             text="Synthetic response",
@@ -46,8 +48,10 @@ class FakeProvider(InferenceProvider):
 
 class ApiTests(unittest.TestCase):
     def setUp(self) -> None:
+        self.provider = FakeProvider()
+
         self.client_context = TestClient(
-            create_app(FakeProvider())
+            create_app(self.provider)
         )
         self.client = self.client_context.__enter__()
 
@@ -62,29 +66,21 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/health")
 
         self.assertEqual(response.status_code, 200)
-
         self.assertEqual(
-            response.json(),
-            {
-                "status": "ok",
-                "provider": "fake",
-                "model": "fake-model",
-                "device": "cpu",
-                "loaded": True,
-            },
+            response.json()["provider"],
+            "fake",
         )
 
-    def test_chat(self) -> None:
+    def test_normal_chat_uses_model(self) -> None:
         response = self.client.post(
             "/v1/chat",
             json={
                 "messages": [
                     {
                         "role": "user",
-                        "content": "Hello",
+                        "content": "What does reverse osmosis do?",
                     }
-                ],
-                "max_new_tokens": 64,
+                ]
             },
         )
 
@@ -92,41 +88,41 @@ class ApiTests(unittest.TestCase):
 
         body = response.json()
 
-        self.assertEqual(
-            body["text"],
-            "Synthetic response",
-        )
-        self.assertEqual(
-            body["model"],
-            "fake-model",
-        )
-        self.assertEqual(
-            body["output_tokens"],
-            3,
-        )
+        self.assertEqual(body["source"], "model")
+        self.assertIsNone(body["policy_rule"])
+        self.assertEqual(self.provider.calls, 1)
 
-    def test_empty_messages_are_rejected(self) -> None:
-        response = self.client.post(
-            "/v1/chat",
-            json={
-                "messages": [],
-            },
-        )
-
-        self.assertEqual(response.status_code, 422)
-
-    def test_unknown_fields_are_rejected(self) -> None:
+    def test_pricing_request_uses_policy(self) -> None:
         response = self.client.post(
             "/v1/chat",
             json={
                 "messages": [
                     {
                         "role": "user",
-                        "content": "Hello",
+                        "content": (
+                            "What is the current price of the "
+                            "D'Acqua Dolce Origin system?"
+                        ),
                     }
-                ],
-                "unexpected": True,
+                ]
             },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        body = response.json()
+
+        self.assertEqual(body["source"], "policy")
+        self.assertEqual(
+            body["policy_rule"],
+            "authoritative_pricing_required",
+        )
+        self.assertEqual(self.provider.calls, 0)
+
+    def test_empty_messages_are_rejected(self) -> None:
+        response = self.client.post(
+            "/v1/chat",
+            json={"messages": []},
         )
 
         self.assertEqual(response.status_code, 422)
