@@ -1,0 +1,49 @@
+{
+  "label": "pre-embedding-deterministic-lexical",
+  "corpus": "data/knowledge/dacqua-foundation.json",
+  "top_k": 3,
+  "cases": [
+    {
+      "id": "retrieval-ro",
+      "query": "How does reverse osmosis work with a membrane?",
+      "expected_document_ids": [
+        "water-reverse-osmosis"
+      ]
+    },
+    {
+      "id": "retrieval-carbon",
+      "query": "What does activated carbon do for chlorine taste and odor?",
+      "expected_document_ids": [
+        "water-carbon-filtration"
+      ]
+    },
+    {
+      "id": "retrieval-softener",
+      "query": "What system addresses hard water calcium and magnesium?",
+      "expected_document_ids": [
+        "water-softening"
+      ]
+    },
+    {
+      "id": "retrieval-conditioning",
+      "query": "Is water conditioning necessarily the same as ion exchange softening?",
+      "expected_document_ids": [
+        "water-conditioning"
+      ]
+    },
+    {
+      "id": "retrieval-uv",
+      "query": "Can ultraviolet UV treatment remove dissolved salts?",
+      "expected_document_ids": [
+        "water-ultraviolet"
+      ]
+    },
+    {
+      "id": "retrieval-claims",
+      "query": "Can the chatbot make a product-specific health or contaminant reduction claim?",
+      "expected_document_ids": [
+        "claims-boundary"
+      ]
+    }
+  ]
+}

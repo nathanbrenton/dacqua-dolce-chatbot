@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "label": "static-curated-foundation",
+  "documents": [
+    {
+      "id": "water-reverse-osmosis",
+      "title": "Reverse Osmosis",
+      "source": "D'Acqua Dolce curated knowledge",
+      "scope": "static-product-education",
+      "tags": [
+        "reverse osmosis",
+        "RO",
+        "membrane",
+        "drinking water"
+      ],
+      "text": "Reverse osmosis is a water-treatment process that uses pressure to move water through a semipermeable membrane. A reverse-osmosis system can reduce dissolved substances and other constituents that the specific membrane and system are designed to reject. Actual performance depends on system design, feed-water conditions, membrane condition, and maintenance. Specific contaminant-reduction claims should come from approved product specifications or certifications rather than from general chatbot knowledge."
+    },
+    {
+      "id": "water-carbon-filtration",
+      "title": "Activated Carbon Filtration",
+      "source": "D'Acqua Dolce curated knowledge",
+      "scope": "static-product-education",
+      "tags": [
+        "carbon",
+        "activated carbon",
+        "taste",
+        "odor",
+        "chlorine"
+      ],
+      "text": "Activated carbon filtration uses adsorption to capture certain substances on the surface of the carbon media. Carbon systems are commonly used for water-quality concerns involving chlorine, taste, odor, and selected organic compounds. The exact substances reduced, capacity, flow performance, and replacement interval depend on the specific media and system. Product-specific reduction claims must come from approved specifications or certifications."
+    },
+    {
+      "id": "water-softening",
+      "title": "Water Softening",
+      "source": "D'Acqua Dolce curated knowledge",
+      "scope": "static-product-education",
+      "tags": [
+        "softener",
+        "hard water",
+        "hardness",
+        "calcium",
+        "magnesium",
+        "ion exchange"
+      ],
+      "text": "A conventional water softener addresses hardness, primarily associated with dissolved calcium and magnesium, by using an ion-exchange process. Softening is different from broad contaminant filtration or purification. System sizing, regeneration behavior, salt use, and performance depend on the specific equipment and incoming water conditions."
+    },
+    {
+      "id": "water-conditioning",
+      "title": "Water Conditioning",
+      "source": "D'Acqua Dolce curated knowledge",
+      "scope": "static-product-education",
+      "tags": [
+        "conditioner",
+        "conditioning",
+        "scale",
+        "whole house"
+      ],
+      "text": "Water conditioning is a broad category and should not automatically be treated as equivalent to ion-exchange softening. Different conditioning technologies may be designed to alter scale-forming behavior or address other water characteristics without removing hardness minerals in the same manner as a conventional softener. Product-specific explanations must identify the actual technology used."
+    },
+    {
+      "id": "water-ultraviolet",
+      "title": "Ultraviolet Water Treatment",
+      "source": "D'Acqua Dolce curated knowledge",
+      "scope": "static-product-education",
+      "tags": [
+        "UV",
+        "ultraviolet",
+        "microorganisms",
+        "disinfection"
+      ],
+      "text": "Ultraviolet water treatment uses UV energy as a disinfection method when the system is properly designed and operated. UV treatment does not by itself remove dissolved salts, hardness minerals, or suspended material. Water quality, lamp condition, flow rate, and validated equipment specifications matter. Microbiological performance claims must come from approved product documentation or certifications."
+    },
+    {
+      "id": "business-authoritative-data-boundary",
+      "title": "Authoritative Business Data Boundary",
+      "source": "D'Acqua Dolce chatbot architecture",
+      "scope": "chatbot-governance",
+      "tags": [
+        "pricing policy",
+        "inventory policy",
+        "business data",
+        "authoritative data"
+      ],
+      "text": "Current prices, price-display restrictions, inventory state, customer records, orders, quote state, and installation scheduling are dynamic business facts. They are not sourced from the chatbot retrieval corpus. The chatbot obtains customer-safe current business information through the authoritative D'Acqua Dolce backend API. If an authoritative current-data source is unavailable, the chatbot must not guess, reconstruct, or invent the value."
+    },
+    {
+      "id": "claims-boundary",
+      "title": "Product and Health Claims Boundary",
+      "source": "D'Acqua Dolce chatbot architecture",
+      "scope": "chatbot-governance",
+      "tags": [
+        "claims",
+        "health claims",
+        "certification",
+        "product claims"
+      ],
+      "text": "General educational descriptions do not authorize product-specific contaminant, health, medical, or performance claims. Product-specific claims must be supported by approved D'Acqua Dolce product documentation, manufacturer documentation, or applicable certification material before they are presented as facts."
+    }
+  ]
+}

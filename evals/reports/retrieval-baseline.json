@@ -1,0 +1,212 @@
+{
+  "label": "pre-embedding-deterministic-lexical",
+  "top_k": 3,
+  "passed": 6,
+  "total": 6,
+  "results": [
+    {
+      "id": "retrieval-ro",
+      "query": "How does reverse osmosis work with a membrane?",
+      "expected_document_ids": [
+        "water-reverse-osmosis"
+      ],
+      "retrieved": [
+        {
+          "document_id": "water-reverse-osmosis",
+          "title": "Reverse Osmosis",
+          "score": 6.282142,
+          "matched_terms": [
+            "membrane",
+            "reverseosmosis"
+          ]
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "retrieval-carbon",
+      "query": "What does activated carbon do for chlorine taste and odor?",
+      "expected_document_ids": [
+        "water-carbon-filtration"
+      ],
+      "retrieved": [
+        {
+          "document_id": "water-carbon-filtration",
+          "title": "Activated Carbon Filtration",
+          "score": 13.773331,
+          "matched_terms": [
+            "activated",
+            "carbon",
+            "chlorine",
+            "odor",
+            "taste"
+          ]
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "retrieval-softener",
+      "query": "What system addresses hard water calcium and magnesium?",
+      "expected_document_ids": [
+        "water-softening"
+      ],
+      "retrieved": [
+        {
+          "document_id": "water-softening",
+          "title": "Water Softening",
+          "score": 8.913849,
+          "matched_terms": [
+            "addresses",
+            "calcium",
+            "hardwater",
+            "magnesium",
+            "system"
+          ]
+        },
+        {
+          "document_id": "water-ultraviolet",
+          "title": "Ultraviolet Water Treatment",
+          "score": 1.40732,
+          "matched_terms": [
+            "hardwater",
+            "system"
+          ]
+        },
+        {
+          "document_id": "water-reverse-osmosis",
+          "title": "Reverse Osmosis",
+          "score": 0.929256,
+          "matched_terms": [
+            "system"
+          ]
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "retrieval-conditioning",
+      "query": "Is water conditioning necessarily the same as ion exchange softening?",
+      "expected_document_ids": [
+        "water-conditioning"
+      ],
+      "retrieved": [
+        {
+          "document_id": "water-conditioning",
+          "title": "Water Conditioning",
+          "score": 10.413866,
+          "matched_terms": [
+            "conditioning",
+            "exchange",
+            "ion",
+            "same",
+            "softener",
+            "water"
+          ]
+        },
+        {
+          "document_id": "water-softening",
+          "title": "Water Softening",
+          "score": 7.047431,
+          "matched_terms": [
+            "exchange",
+            "ion",
+            "softener",
+            "water"
+          ]
+        },
+        {
+          "document_id": "water-ultraviolet",
+          "title": "Ultraviolet Water Treatment",
+          "score": 0.975793,
+          "matched_terms": [
+            "water"
+          ]
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "retrieval-uv",
+      "query": "Can ultraviolet UV treatment remove dissolved salts?",
+      "expected_document_ids": [
+        "water-ultraviolet"
+      ],
+      "retrieved": [
+        {
+          "document_id": "water-ultraviolet",
+          "title": "Ultraviolet Water Treatment",
+          "score": 10.18512,
+          "matched_terms": [
+            "dissolved",
+            "remove",
+            "salts",
+            "treatment",
+            "ultraviolet"
+          ]
+        },
+        {
+          "document_id": "water-reverse-osmosis",
+          "title": "Reverse Osmosis",
+          "score": 1.881635,
+          "matched_terms": [
+            "dissolved",
+            "treatment"
+          ]
+        },
+        {
+          "document_id": "water-softening",
+          "title": "Water Softening",
+          "score": 0.8925,
+          "matched_terms": [
+            "dissolved"
+          ]
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "retrieval-claims",
+      "query": "Can the chatbot make a product-specific health or contaminant reduction claim?",
+      "expected_document_ids": [
+        "claims-boundary"
+      ],
+      "retrieved": [
+        {
+          "document_id": "claims-boundary",
+          "title": "Product and Health Claims Boundary",
+          "score": 5.808298,
+          "matched_terms": [
+            "contaminant",
+            "health",
+            "product",
+            "specific"
+          ]
+        },
+        {
+          "document_id": "water-reverse-osmosis",
+          "title": "Reverse Osmosis",
+          "score": 3.850021,
+          "matched_terms": [
+            "chatbot",
+            "contaminant",
+            "product",
+            "reduction",
+            "specific"
+          ]
+        },
+        {
+          "document_id": "water-carbon-filtration",
+          "title": "Activated Carbon Filtration",
+          "score": 2.014832,
+          "matched_terms": [
+            "product",
+            "reduction",
+            "specific"
+          ]
+        }
+      ],
+      "passed": true
+    }
+  ]
+}
