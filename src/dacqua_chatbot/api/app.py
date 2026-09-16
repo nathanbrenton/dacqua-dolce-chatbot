@@ -18,6 +18,7 @@ from starlette.concurrency import (
 )
 
 from dacqua_chatbot.chat import (
+    DEFAULT_SYSTEM_PROMPT,
     ChatService,
 )
 from dacqua_chatbot.inference import (
@@ -141,11 +142,17 @@ def create_app(
 
         messages = [
             ChatMessage(
-                role=message.role,
-                content=message.content,
-            )
-            for message
-            in payload.messages
+                role="system",
+                content=DEFAULT_SYSTEM_PROMPT,
+            ),
+            *[
+                ChatMessage(
+                    role=message.role,
+                    content=message.content,
+                )
+                for message
+                in payload.messages
+            ],
         ]
 
         try:

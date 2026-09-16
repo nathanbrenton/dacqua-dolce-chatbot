@@ -86,14 +86,6 @@ def main() -> None:
             json={
                 "messages": [
                     {
-                        "role": "system",
-                        "content": (
-                            "You are a concise assistant for "
-                            "D'Acqua Dolce, a premium water "
-                            "filtration company."
-                        ),
-                    },
-                    {
                         "role": "user",
                         "content": (
                             "In one sentence, explain what "

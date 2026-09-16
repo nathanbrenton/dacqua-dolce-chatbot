@@ -17,7 +17,6 @@ class ChatMessageRequest(BaseModel):
     )
 
     role: Literal[
-        "system",
         "user",
         "assistant",
     ]

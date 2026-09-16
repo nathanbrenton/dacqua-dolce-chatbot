@@ -12,6 +12,7 @@ from datetime import (
 from pathlib import Path
 
 from dacqua_chatbot.chat import (
+    DEFAULT_SYSTEM_PROMPT,
     ChatService,
 )
 from dacqua_chatbot.inference import (
@@ -61,10 +62,7 @@ MD_REPORT = (
     / "rag-integrated-baseline.md"
 )
 
-SYSTEM_PROMPT = (
-    "You are a concise assistant for D'Acqua Dolce, "
-    "a premium water filtration company."
-)
+SYSTEM_PROMPT = DEFAULT_SYSTEM_PROMPT
 
 
 def load_cases() -> list[dict]:
